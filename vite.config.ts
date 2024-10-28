@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import vuetify from 'vite-plugin-vuetify';
 
 export default defineConfig({
-  base: '/media-ecnrypted',
+  base: '/media-decrypter',
   build: {
     sourcemap: true,
   },
