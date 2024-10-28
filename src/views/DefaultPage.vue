@@ -1,3 +1,5 @@
 <script lang="ts" setup></script>
 
-<template>Приветики</template>
+<template>
+  <div>Приветики</div>
+</template>
