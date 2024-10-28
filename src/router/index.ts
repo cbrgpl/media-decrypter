@@ -5,19 +5,21 @@ const routes: RouteRecordRaw[] = [
     path: '/crypto-key',
     name: 'CryptoKey',
     component: () => import('@/views/CryptoKey/CryptoKey.vue'),
-    children: [],
   },
   {
     path: '/encrypter',
     name: 'Encrypter',
     component: () => import('@/views/EncrypterPage/EncrypterPage.vue'),
-    children: [],
   },
   {
     path: '/gallery',
     name: 'Gallery',
     component: () => import('@/views/GalleryPage/GalleryPage.vue'),
-    children: [],
+  },
+  {
+    path: '/',
+    name: 'Default',
+    component: () => import('@/views/DefaultPage.vue'),
   },
   {
     path: '/:pathMatch(.*)*',
