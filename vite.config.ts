@@ -7,7 +7,7 @@ import vue from '@vitejs/plugin-vue';
 import vuetify from 'vite-plugin-vuetify';
 
 export default defineConfig({
-  base: '/media-decrypter-pwa',
+  base: '/media-decrypter',
   build: {
     sourcemap: true,
   },
