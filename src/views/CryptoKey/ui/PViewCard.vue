@@ -19,7 +19,7 @@ const submitDialogStore = useSubmitDialogStore();
 const theStore = useTheStore();
 
 const { saltHint } = useSaltHint(computed(() => theStore.salt));
-const COUNT_OF_COLUMNS_FOR_PRETTY_PASSPHRASE = 4;
+const COUNT_OF_COLUMNS_FOR_PRETTY_PASSPHRASE = 2;
 const prettyPasshprase = computed(() => {
   if (theStore.passphrase === null) {
     return null;
@@ -29,7 +29,7 @@ const prettyPasshprase = computed(() => {
 
   const columns: Array<{ word: string; order: number }[]> = [];
   const wordsPerColumn = words.length / COUNT_OF_COLUMNS_FOR_PRETTY_PASSPHRASE;
-  for (let i = 0; i < wordsPerColumn; ++i) {
+  for (let i = 0; i < COUNT_OF_COLUMNS_FOR_PRETTY_PASSPHRASE; ++i) {
     columns.push(
       words.slice(i * wordsPerColumn, (i + 1) * wordsPerColumn).map((word, colInx) => ({
         word,
@@ -37,6 +37,8 @@ const prettyPasshprase = computed(() => {
       })),
     );
   }
+
+  console.log(columns);
 
   return columns;
 });
