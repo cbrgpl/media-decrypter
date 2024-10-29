@@ -1,6 +1,7 @@
 <script lang="ts">
 import ZSnackbars from './components/snackbars';
 import ZSystemBar from './components/singletons/ZSystemBar.vue';
+import ZSubmitDialog from './components/singletons/ZSubmitDialog/ui/ZSubmitDialog.vue';
 </script>
 
 <script setup lang="ts">
@@ -40,10 +41,10 @@ const goToPage = (v: unknown) => {
 
 <template>
   <div>
-    <ZSnackbars />
-
     <VApp class="h-screen">
+      <ZSnackbars />
       <ZSystemBar />
+      <ZSubmitDialog />
 
       <VAppBar>
         <VTabs

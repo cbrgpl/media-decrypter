@@ -3,11 +3,13 @@ import PMedia from './PMedia.vue';
 </script>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 
 import { swipeLeftOn, swipeRightOn, touchXDiff } from '@/utils/touchUtils';
 
 import type { IMediaViewerShowingRequestWrapper, IEFilePointerViewerMod } from './../types';
+import { useSubmitDialogStore } from '@/components/singletons/ZSubmitDialog';
+import { useSnackbarStore } from '@/components/snackbars';
 
 defineOptions({
   name: 'PMediaViewer',
@@ -20,6 +22,9 @@ const $props = defineProps<{
 const $emit = defineEmits<{
   remove: [fileId: string];
 }>();
+
+const submitDialogStore = useSubmitDialogStore();
+const snackbarStore = useSnackbarStore();
 
 const dialogVisible = ref(false);
 
@@ -78,13 +83,27 @@ const removeFile = () => {
     return;
   }
 
-  $emit('remove', currentViewedFile.value.fileId);
+  submitDialogStore.submit({
+    title: `Удалить файл "${currentViewedFile.value.fileName}"?`,
+    text: 'Он будет полностью удален из приложения, и в дальнейшем его придется импортировать заново',
+    onSubmit() {
+      if (!currentViewedFile.value || !currentViewRequest.value) {
+        snackbarStore.showSnackbar().error({
+          title: 'Не получилось удалить',
+          text: 'Когда я попытался удалить файл, то он уже был недоступен. Попытайся снова',
+        });
+        return;
+      }
 
-  if ($props.eFilePointers.length === 1) {
-    hideDialog();
-  } else if (currentViewRequest.value.index === $props.eFilePointers.length - 1) {
-    showPrevMedia();
-  }
+      $emit('remove', currentViewedFile.value.fileId);
+
+      if ($props.eFilePointers.length === 1) {
+        hideDialog();
+      } else if (currentViewRequest.value.index === $props.eFilePointers.length - 1) {
+        showPrevMedia();
+      }
+    },
+  });
 };
 
 const transformByTouchXDiff = computed(() => {
@@ -102,6 +121,7 @@ defineExpose({ viewMedia });
   <VDialog
     fullscreen
     opacity="0"
+    close-on-back
     :model-value="dialogVisible"
     @afterLeave="hideDialog"
   >

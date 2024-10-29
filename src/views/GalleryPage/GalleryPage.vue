@@ -72,9 +72,15 @@ const removeFile = async (fileId: string) => {
     await dbDelete(EDbStore.FILE, fileId);
     await dbDelete(EDbStore.POINTER, fileId);
 
+    let deletedFileName = null as string | null;
     const pointerInx = eFilePointers.value.findIndex((pointer) => pointer.fileId == fileId);
     if (pointerInx !== -1) {
+      deletedFileName = eFilePointers.value[pointerInx].fileName;
       eFilePointers.value.splice(pointerInx, 1);
+
+      snackbarStore.showSnackbar().success({
+        text: `Я удалил файл "${deletedFileName}"`,
+      });
     } else {
       throw new Error('Не удалось удалить указатель, т.к. он не был найден в списке указателей');
     }

@@ -74,6 +74,7 @@ const removeSnackbar = () => {
   position: static;
   cursor: pointer;
   user-select: none;
+  padding-top: 0;
 }
 
 .snackbar__close-event-analog {

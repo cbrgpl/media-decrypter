@@ -5,6 +5,7 @@ import { computed } from 'vue';
 
 import { useTheStore } from '@/store';
 import { useSnackbarStore } from '@/components/snackbars';
+import { useSubmitDialogStore } from '@/components/singletons/ZSubmitDialog';
 import { saveFile } from '@/utils/saveFile';
 
 import { useSaltHint } from '../composables/useSaltHint';
@@ -14,7 +15,9 @@ defineOptions({
 });
 
 const snackbarStore = useSnackbarStore();
+const submitDialogStore = useSubmitDialogStore();
 const theStore = useTheStore();
+
 const { saltHint } = useSaltHint(computed(() => theStore.salt));
 const COUNT_OF_COLUMNS_FOR_PRETTY_PASSPHRASE = 4;
 const prettyPasshprase = computed(() => {
@@ -53,7 +56,13 @@ const downloadSalt = () => {
 };
 
 const resetCryptoKey = async () => {
-  theStore.resetPassphrase();
+  submitDialogStore.submit({
+    title: 'Сбросить ключ?',
+    text: 'Если сбросить ключ, то файлы, хранящиеся в приложении не смогут быть расшифрованы в следующий раз, когда ты зайдешь. Ключ нужно будет ввести заново и только потом можно будет смотреть файлы',
+    onSubmit() {
+      theStore.resetPassphrase();
+    },
+  });
 };
 </script>
 
