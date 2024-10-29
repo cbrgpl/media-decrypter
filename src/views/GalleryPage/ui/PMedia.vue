@@ -6,6 +6,10 @@ import { formatMilliseconds } from '@/utils/formatMilliseconds';
 import { EMediaType } from '../consts';
 import type { IPreparedFile } from '../types';
 
+defineOptions({
+  name: 'PMedia',
+});
+
 const $props = withDefaults(
   defineProps<{
     file: IPreparedFile;

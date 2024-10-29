@@ -44,7 +44,6 @@ const fileWithSaltUploaded = async (file?: File | File[]) => {
   }
 
   try {
-    console.log(file.type);
     if (file.type !== 'text/plain') {
       snackbarStore.showSnackbar().error({
         title: 'Какой-то не такой файл',

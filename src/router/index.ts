@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
+import { createRouter, type RouteRecordRaw, createWebHashHistory } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -17,18 +17,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/GalleryPage/GalleryPage.vue'),
   },
   {
-    path: '/',
-    name: 'Default',
-    component: () => import('@/views/DefaultPage.vue'),
-  },
-  {
     path: '/:pathMatch(.*)*',
     redirect: { name: 'CryptoKey' },
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes,
 });
 

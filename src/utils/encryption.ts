@@ -105,7 +105,6 @@ export const decrypt = async (key: CryptoKey, encryptedArrayBuffer: ArrayBuffer,
       key,
       ciphertext,
     );
-    console.log('dsd');
 
     return decryptedContent;
   } catch (err) {

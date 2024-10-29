@@ -3,19 +3,26 @@ import PMediaDecrypter from './PMediaDecrypter.vue';
 </script>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useAttrs } from 'vue';
 import type { VSheet } from 'vuetify/components';
 
-import type { IMediaViewerShowingRequestWrapper, IModifiedFileSystemFileHandle } from './../types';
+import type { IMediaViewerShowingRequestWrapper, IEFilePointerViewerMod } from './../types';
+
+defineOptions({
+  name: 'PMediaGrid',
+  inheritAttrs: false,
+});
 
 const $props = defineProps<{
   scrollingContainer: HTMLElement | null;
-  fileHandles: IModifiedFileSystemFileHandle[];
+  eFilePointers: IEFilePointerViewerMod[];
 }>();
 
 const $emit = defineEmits<{
   showInMediaViewer: [IMediaViewerShowingRequestWrapper];
 }>();
+
+const $attrs = useAttrs();
 
 const observerOptions = computed(() => {
   if (!$props.scrollingContainer) {
@@ -31,14 +38,19 @@ const observerOptions = computed(() => {
 </script>
 
 <template>
+  <template v-if="eFilePointers.length === 0">
+    <VDivider class="mb-4" />
+    <h5 class="text-h5 text-center">Пусто тут</h5>
+  </template>
   <VSheet
+    v-bind="$attrs"
     color="transparent"
     class="gallery__media-grid"
   >
     <template v-if="observerOptions !== null">
       <VLazy
-        v-for="(handle, i) of $props.fileHandles"
-        :key="i"
+        v-for="(pointer, i) of $props.eFilePointers"
+        :key="pointer.fileId"
         min-height="50"
         :options="observerOptions"
         transition="fade-transition"
@@ -46,7 +58,7 @@ const observerOptions = computed(() => {
         <template #default>
           <PMediaDecrypter
             :i="i"
-            :file-handle="handle"
+            :file-pointer="pointer"
             @showInMediaViewer="$emit('showInMediaViewer', $event)"
           />
         </template>

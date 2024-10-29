@@ -29,8 +29,6 @@ export const intToArrayBuffer = (v: number | bigint, bytes: number) => {
     dataView.setInt8(i, Number(bigIntedNum >> BigInt(BITS_PER_BYTE * (lastByteInx - i))) & 0xff);
   }
 
-  console.log(intFromArrayBuffer(buffer));
-
   return buffer;
 };
 

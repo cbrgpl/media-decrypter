@@ -6,9 +6,10 @@ import { useTheStore } from '@/store';
 
 import { encrypt } from '@/utils/encryption';
 
-import type { IEncryptedFile } from '../types';
 import { intToArrayBuffer } from '@/utils/intArrBufferCasts';
 import { strToArrayBuffer } from '@/utils/strArrBufferCasts';
+
+import { type IEncryptedFile } from '../types';
 
 defineOptions({
   name: 'PEncryptingCard',
@@ -90,7 +91,6 @@ const startEncryption = async () => {
       .map((result) => (result.status === 'rejected' ? result.reason : null))
       .filter((err) => err !== null)
       .forEach((err) => {
-        console.log(err);
         snackbarStore.showSnackbar().error({
           title: `${err.cause ?? 'Ошибка при шифровании файла'}`,
           text: err.message,

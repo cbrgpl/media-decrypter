@@ -85,3 +85,5 @@ export const useSnackbarStore = defineStore('snackbar', {
     },
   },
 });
+
+export type ISnackbarStore = ReturnType<typeof useSnackbarStore>;

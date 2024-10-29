@@ -5,37 +5,37 @@ import PMedia from './PMedia.vue';
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 
-import { useSnackbarStore } from '@/components/snackbars';
 import { swipeLeftOn, swipeRightOn, touchXDiff } from '@/utils/touchUtils';
 
-import type { IMediaViewerShowingRequestWrapper, IModifiedFileSystemFileHandle } from './../types';
+import type { IMediaViewerShowingRequestWrapper, IEFilePointerViewerMod } from './../types';
+
+defineOptions({
+  name: 'PMediaViewer',
+});
 
 const $props = defineProps<{
-  fileHandles: IModifiedFileSystemFileHandle[];
+  eFilePointers: IEFilePointerViewerMod[];
 }>();
 
-const snackbarStore = useSnackbarStore();
+const $emit = defineEmits<{
+  remove: [fileId: string];
+}>();
+
+const dialogVisible = ref(false);
 
 const currentViewRequest = ref<null | IMediaViewerShowingRequestWrapper>(null);
 const currentViewedFile = computed(() => {
   if (!currentViewRequest.value) {
     return null;
   }
-
-  const handle = $props.fileHandles[currentViewRequest.value.index];
+  const pointer = $props.eFilePointers[currentViewRequest.value.index];
 
   return {
-    preparedFile: handle.__preparedFile?.value ?? null,
-    fileType: handle.__file?.value?.type ?? null,
+    preparedFile: pointer.__raw.preparedFile?.value ?? null,
+    fileType: pointer.__raw.file?.value?.type ?? null,
+    fileId: pointer.fileId,
+    fileName: pointer.fileName,
   };
-});
-watch(currentViewedFile, (value) => {
-  if (value !== null && (value.fileType === null || value.preparedFile === null)) {
-    snackbarStore.showSnackbar().error({
-      title: 'Не удается отобразить файл',
-      text: `Не удалось получить тип файла или сами данные файла для просмотра в MediaViewer\nfileType="${value.fileType}"\npreparedFile=${value.preparedFile}`,
-    });
-  }
 });
 
 const showNextMedia = () => {
@@ -43,7 +43,7 @@ const showNextMedia = () => {
     return;
   }
 
-  if (currentViewRequest.value.index === $props.fileHandles.length - 1) {
+  if (currentViewRequest.value.index === $props.eFilePointers.length - 1) {
     return;
   }
 
@@ -51,7 +51,6 @@ const showNextMedia = () => {
     index: currentViewRequest.value.index + 1,
   };
 };
-swipeLeftOn(showNextMedia);
 
 const showPrevMedia = () => {
   if (!currentViewRequest.value) {
@@ -65,7 +64,28 @@ const showPrevMedia = () => {
     index: currentViewRequest.value.index - 1,
   };
 };
+
+swipeLeftOn(showNextMedia);
 swipeRightOn(showPrevMedia);
+
+const hideDialog = () => {
+  dialogVisible.value = false;
+  currentViewRequest.value = null;
+};
+
+const removeFile = () => {
+  if (!currentViewedFile.value || !currentViewRequest.value) {
+    return;
+  }
+
+  $emit('remove', currentViewedFile.value.fileId);
+
+  if ($props.eFilePointers.length === 1) {
+    hideDialog();
+  } else if (currentViewRequest.value.index === $props.eFilePointers.length - 1) {
+    showPrevMedia();
+  }
+};
 
 const transformByTouchXDiff = computed(() => {
   return `translateX(${(-1 * touchXDiff.value) / 10}px)`;
@@ -73,6 +93,7 @@ const transformByTouchXDiff = computed(() => {
 
 const viewMedia = (request: IMediaViewerShowingRequestWrapper) => {
   currentViewRequest.value = request;
+  dialogVisible.value = true;
 };
 defineExpose({ viewMedia });
 </script>
@@ -81,46 +102,70 @@ defineExpose({ viewMedia });
   <VDialog
     fullscreen
     opacity="0"
-    :model-value="currentViewRequest !== null"
+    :model-value="dialogVisible"
+    @afterLeave="hideDialog"
   >
     <VFadeTransition>
-      <VSheet
-        v-if="currentViewedFile && currentViewedFile.fileType && currentViewedFile.preparedFile"
-        class="gallery__media-viewer-card"
-      >
+      <VSheet class="gallery__media-viewer-card">
         <div class="gallery__media-viewer-actions">
           <VBtn
             size="x-large"
             :ripple="false"
             color="secondary-darken-1"
             text="Назад"
+            class="desktop-only"
             @click="showPrevMedia"
           />
-          <VBtn
-            width="100%"
-            size="x-large"
-            :ripple="false"
-            text="Назад"
-            @click="currentViewRequest = null"
-          />
+          <div class="d-flex flex-grow-1">
+            <VBtn
+              color="error"
+              size="x-large"
+              @click="removeFile"
+            >
+              <VIcon icon="mdi-delete-empty" />
+            </VBtn>
+            <VBtn
+              size="x-large"
+              class="flex-grow-1"
+              :ripple="false"
+              text="Назад"
+              @click="hideDialog"
+            />
+          </div>
           <VBtn
             size="x-large"
             :ripple="false"
             color="secondary-darken-1"
+            class="desktop-only"
             text="Вперед"
             @click="showNextMedia"
           />
         </div>
+
         <div
           class="gallery__media-viewer-inner"
           :style="{ transform: transformByTouchXDiff }"
         >
           <PMedia
+            v-if="currentViewedFile && currentViewedFile.fileType && currentViewedFile.preparedFile"
             :file="currentViewedFile.preparedFile"
             :file-type="currentViewedFile.fileType"
             in-viewer
           />
+          <div
+            v-else
+            class="mx-auto"
+          >
+            Что-то не могу отобразить :(
+          </div>
         </div>
+
+        <span
+          v-if="!currentViewedFile?.preparedFile"
+          class="d-flex align-center position-absolute left-0 bottom-0 pa-1"
+        >
+          {{ currentViewedFile?.fileName }}
+        </span>
       </VSheet>
     </VFadeTransition>
   </VDialog>
@@ -134,13 +179,15 @@ defineExpose({ viewMedia });
   align-items: center;
   justify-items: center;
   overflow: hidden !important;
+  position: relative;
 }
 
 .gallery__media-viewer-actions {
   width: 100vw;
+  display: flex;
 }
 
-.gallery__media-viewer-actions > *:not(:nth-child(2)) {
+.gallery__media-viewer-actions > .desktop-only {
   display: none;
 }
 
@@ -161,7 +208,7 @@ defineExpose({ viewMedia });
 @media (pointer: fine), (pointer: none) {
   .gallery__media-viewer-actions {
     display: grid;
-    grid-template-columns: minmax(150px, 250px) minmax(150px, 1fr) minmax(150px, 250px);
+    grid-template-columns: minmax(150px, 250px) minmax(auto, 1fr) minmax(150px, 250px);
     overflow: auto;
   }
 

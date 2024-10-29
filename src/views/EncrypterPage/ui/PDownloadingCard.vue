@@ -1,10 +1,15 @@
+<script lang="ts">
+import ZFilesListCard from '@/components/cards/ZFilesListCard';
+</script>
+
 <script setup lang="ts">
+import { computed } from 'vue';
 import { saveFile } from '@/utils/saveFile';
 
 import type { IEncryptedFile } from './../types';
 
 defineOptions({
-  name: 'PDownloadingCard',
+  name: 'ZDownloadingCard',
 });
 
 const $props = defineProps<{ encryptedFiles: IEncryptedFile[] }>();
@@ -13,44 +18,31 @@ const $emit = defineEmits<{
   filesDownloaded: [];
 }>();
 
+const files = computed(() =>
+  $props.encryptedFiles.map(({ blob, name }) => new File([blob], name, { type: blob.type })),
+);
+
 const downloadEncryptedFiles = () => {
   for (const file of $props.encryptedFiles) {
     saveFile(file.name, file.blob);
   }
 
-  // encryptedFiles.value = [];
-  // files.value = [];
   $emit('filesDownloaded');
 };
 </script>
 <template>
-  <VCard
-    v-if="$props.encryptedFiles.length"
-    class="encrypter__card"
+  <ZFilesListCard
+    title="Зашифрованные файлы:"
+    :files="files"
   >
-    <VCardTitle>
-      <h4 class="mb-2">Зашифрованные файлы:</h4>
-      <div class="d-flex">
-        <VChip
-          v-for="file of $props.encryptedFiles"
-          :key="file.name"
-          color="secondary"
-          class="encrypter__encrypted-file-chip"
-        >
-          {{ file.name }}
-        </VChip>
-      </div>
-    </VCardTitle>
-    <VCardText>
-      <div class="mt-8">
-        <VBtn
-          text="Скачать"
-          class="w-100 mt-4"
-          size="x-large"
-          color="secondary"
-          @click="downloadEncryptedFiles"
-        />
-      </div>
-    </VCardText>
-  </VCard>
+    <div class="mt-8">
+      <VBtn
+        text="Скачать"
+        class="w-100 mt-4"
+        size="x-large"
+        color="secondary"
+        @click="downloadEncryptedFiles"
+      />
+    </div>
+  </ZFilesListCard>
 </template>
